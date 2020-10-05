@@ -31,37 +31,49 @@ using namespace std;
 int recieveInput() {
   string input = WHITE;
   input = "";
-	//ofstream filestream;
-	//filestream.open("/etc/hostname");
+	ofstream filestream;
 
   cout << BOLDGREEN << getenv("USER") << "@" << getenv("HOSTNAME") << RESET << ":" << BOLDBLUE << getenv("DIRS") << RESET << "$ ";
   cin >> input;
 
   if (input == "help") {
-    cout << "Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- shn [new hostname] | Set HostName (coming soon) (requires elevated permissions)\n- gab-do | 'Globaly Avaliable Binary Do' - Create a link from here to /bin/ys while keeping all functionally including updates. (requires sudo permissions)\n- gab-undo | 'Globaly Avaliable Binary Undo' - Remove the globaly avaliable binary (while still keeping YoungShell installed) (requires sudo permissions)\n";
+    cout << "Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- shn | Set HostName (requires elevated permissions)\n- gab-do | 'Globally Avaliable Binary Do' - Create a link from here to /bin/ys while keeping all functionally including updates. (requires elevated permissions)\n- gab-undo | 'Globally Avaliable Binary Undo' - Remove the globaly avaliable binary (while still keeping YoungShell installed) (requires elevated permissions)\n- update | Update YoungShell and optionally the host computer (could need elevated permissions)";
   } else if (input == "exit") {
     cout << BOLDMAGENTA << "Now exiting YoungShell...\n" << RESET;
     return 0;
   } else if (input == "reload") {
-    system("bash src/PortableSetup.sh");
+    system("bash src/Setup.sh");
     return 0;
   } else if (input == "clear") {
     system("clear");
     cout << "\033[1m\033[36m" << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n" << "\033[34m" << "-----------------------------------------------------------------------------\n" << "\033[0m";
   } else if (input == "shn") {
-		if (input.substr(3, 4) == "") {
-			cout << "shn [new hostname] | Set HostName (coming soon) (requires elevated permissions)\n";
-		}
-		// if (filestream.is_open()) {
-		// 	filestream << input;
-		// 	filestream.close();
-		// } else { 
-		// 	cout << "Unable to open file! Do you have access?\n";
-		// }
+			cout << "Enter your new hostname. (must have sudo access)\n$ ";
+			cin >> input;
+			filestream.open("/etc/hostname");
+			if (filestream.is_open()) {
+				filestream << input;
+				filestream.close();
+			} else { 
+				cout << "Unable to open file! Do you have access?\n";
+			}
 	} else if (input == "update") {
-		cout << "Now updating... (requires sudo permissions)\n";
-		system("git pull;sudo apt-get update;sudo apt-get upgrade;sudo apt-get full-upgrade;sudo apt-get dist-upgrade");
-		cout << "Some updates may require a computer reboot!\n";
+		cout << BOLDYELLOW << "Now updating YoungShell..." << RESET << WHITE << "\n";
+		system("git pull https://github.com/youngchief-btw/YoungShell.git;git fetch https://github.com/youngchief-btw/YoungShell.git");
+		cout << RESET << BOLDYELLOW << "Do you want to install system updates as well? (might require sudo permissions) [y/N]:" << RESET << " ";
+		cin >> input;
+		if (input == "y") {
+			#ifdef _WIN32
+				system("Install-Module PWWindowsUpdate;Get-WindowsUpdate;Install-WindowsUpdate");
+			#endif
+			#ifdef linux
+				system("sudo apt-get update;sudo apt-get upgrade;sudo apt-get full-upgrade;sudo apt-get dist-upgrade");
+			#endif
+			#ifdef __MACH__
+				system("softwareupdate -I -a");
+			#endif
+			cout << BOLDYELLOW << "Some updates may require a computer reboot!" << RESET << "\n";
+		} else {}
 	} else if (input == "gab-do") {
 		cout << "Now creating a link from here to /bin/ys\nMake sure to have sudo permissions!\n";
 		system("ln $(pwd)/ys /bin/ys");
