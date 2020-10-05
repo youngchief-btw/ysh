@@ -9,7 +9,8 @@
 #include <iterator>
 using namespace std;
 
-//the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
+// The following are Linux & MacOS ONLY Terminal color codes.
+// To-Do: Work on getting colors done in Windows (see here: https://stackoverflow.com/questions/4053837/colorizing-text-in-the-console-with-c)
 #define RESET "\033[0m"
 #define BLACK "\033[30m" /* Black */
 #define RED "\033[31m" /* Red */
@@ -48,9 +49,14 @@ int recieveInput() {
     system("clear");
     cout << "\033[1m\033[36m" << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n" << "\033[34m" << "-----------------------------------------------------------------------------\n" << "\033[0m";
   } else if (input == "shn") {
-			cout << "Enter your new hostname. (must have sudo access)\n$ ";
-			cin >> input;
+    cout << "Enter your new hostname. (must have sudo access)\n$ ";
+    cin >> input;
+			#ifdef _WIN32
+			filestream.open("\Windows\System32\etc\hostname");
+			#endif
+			#ifdef __unix__
 			filestream.open("/etc/hostname");
+			#endif
 			if (filestream.is_open()) {
 				filestream << input;
 				filestream.close();
@@ -76,7 +82,12 @@ int recieveInput() {
 		} else {}
 	} else if (input == "gab-do") {
 		cout << "Now creating a link from here to /bin/ys\nMake sure to have sudo permissions!\n";
+		#ifdef _WIN32
+		system("mklink $(echo %cd%)\ys \Windows\System32\ys");
+		#endif
+		#ifdef __unix__
 		system("ln $(pwd)/ys /bin/ys");
+		#endif
 	} else if (input == "gab-undo") {
 		cout << "Now unlinking the globaly avaliable binary from here\nMake sure to have sudo permissions!\n.";
 		system("rm -rf /bin/ys");
