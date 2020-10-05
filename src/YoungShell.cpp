@@ -37,7 +37,7 @@ int recieveInput() {
   cin >> input;
 
   if (input == "help") {
-    cout << "Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- shn | Set HostName (requires elevated permissions)\n- gab-do | 'Globally Avaliable Binary Do' - Create a link from here to /bin/ys while keeping all functionally including updates. (requires elevated permissions)\n- gab-undo | 'Globally Avaliable Binary Undo' - Remove the globaly avaliable binary (while still keeping YoungShell installed) (requires elevated permissions)\n- update | Update YoungShell and optionally the host computer (could need elevated permissions)";
+    cout << "Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- shn | Set HostName (requires elevated permissions)\n- gab-do | 'Globally Avaliable Binary Do' - Create a link from here to /bin/ys while keeping all functionally including updates. (requires elevated permissions)\n- gab-undo | 'Globally Avaliable Binary Undo' - Remove the globaly avaliable binary (while still keeping YoungShell installed) (requires elevated permissions)\n- update | Update YoungShell and optionally the host computer (could need elevated permissions)\n";
   } else if (input == "exit") {
     cout << BOLDMAGENTA << "Now exiting YoungShell...\n" << RESET;
     return 0;
