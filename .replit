@@ -1,1 +1,1 @@
-run = "bash src/PortableSetup.sh"
+run = "bash src/Setup.sh"
