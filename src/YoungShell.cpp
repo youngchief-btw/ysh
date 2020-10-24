@@ -35,6 +35,14 @@ using namespace std;
 #define UNDERLINE_OFF "\033[0m" /* Turn off underlining */
 #endif
 
+int clearShell() {
+	system("clear");
+	cout << BOLDCYAN << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n-----------------------------------------------------------------------------\n" << "\033[0m";
+	#ifdef _WIN32
+	cout << ">| Sorry about no colored output for Windows!\n>| I'm working on it!\n-----------------------------------------------------------------------------\n";
+	#endif
+}
+
 int recieveInput() {
   string input = WHITE;
   input = "";
@@ -44,7 +52,7 @@ int recieveInput() {
   cin >> input;
 
   if (input == "help") {
-    cout << BOLDMAGENTA << "Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- shn | Set HostName (requires elevated permissions)\n- gab | 'Globally Avaliable Binary' (requires elevated permissions)\n- update | Update YoungShell and optionally the host computer (could need elevated permissions)\n- m3 | 'Manage/Modify My Machine' \n" << RESET;
+    cout << BOLDMAGENTA << ">| Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- gab | 'Globally Avaliable Binary' (requires elevated permissions)\n- update | Update YoungShell and optionally the host computer (could need elevated permissions)\n- m3 | 'Manage/Modify My Machine' \n>| Everything else will go to your default shell and returned back to you\n" << RESET;
   } else if (input == "exit") {
     cout << BOLDMAGENTA << "Now exiting YoungShell...\n" << RESET;
     return 0;
@@ -52,27 +60,8 @@ int recieveInput() {
     system("bash src/Setup.sh");
     return 0;
   } else if (input == "clear") {
-		system("clear");
-		cout << BOLDCYAN << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n-----------------------------------------------------------------------------\n" << "\033[0m";
-		#ifdef _WIN32
-		cout << ">| Sorry about no colored output for Windows!\n>| I'm working on it!\n-----------------------------------------------------------------------------\n";
-		#endif
-  } else if (input == "shn") {
-    cout << "Enter your new hostname. (must have sudo access)\n$ ";
-    cin >> input;
-			#ifdef _WIN32
-			filestream.open("\Windows\System32\etc\hostname");
-			#endif
-			#ifdef __unix__
-			filestream.open("/etc/hostname");
-			#endif
-			if (filestream.is_open()) {
-				filestream << input;
-				filestream.close();
-			} else { 
-				cout << "Unable to open file! Do you have access?\n";
-			}
-	} else if (input == "update") {
+		clearShell();
+  } else if (input == "update") {
 		cout << BOLDYELLOW << "Now updating YoungShell..." << RESET << WHITE << "\n";
 		system("git pull https://github.com/youngchief-btw/YoungShell.git;git fetch https://github.com/youngchief-btw/YoungShell.git");
 		cout << RESET << BOLDYELLOW << "Do you want to install system & application updates as well? (might require sudo permissions) [y/N]:" << RESET << " ";
@@ -105,10 +94,10 @@ int recieveInput() {
 			system("rm -rf /bin/ys");
 		}
 	} else if (input == "m3") {
-		cout << BOLDMAGENTA << "Welcome to Manage My Machine!!\nValid Options: dns (DNS Settings), msc (Machine Specific Commands)\n" << RESET << "$ ";
+		cout << BOLDMAGENTA << "Welcome to Manage My Machine!!\nValid Options: dns (DNS Settings), msc (Machine Specific Commands), shn (Set HostName) (requires elevated permissions)\n" << RESET << "$ ";
 		cin >> input;
 		if (input == "dns") {
-			cout << BOLDMAGENTA << ">| DNS Settings\n" << RESET << "$ ";
+			cout << BOLDMAGENTA << ">| DNS Settings\nValid Options: setsrvs (Set Servers, Comma Seperated)\n" << RESET << "$ ";
 			cin >> input;
 			if (input == "setsrvs") {
 				cout << BOLDMAGENTA << ">>| Setting DNS Servers\n" << RESET << "$ ";
@@ -160,23 +149,33 @@ int recieveInput() {
 				} else if (input == "spk") {
 					cout << BOLDMAGENTA << "What would you like to set your product key to?\n" << RESET;
 					cin >> input;
-					system("slmgr.vbs /ipk " + input);
+					system("slmgr.vbs /ipk " + input.c_str());
 					cout << BOLDMAGENTA << "\n" << RESET;
 				}
-			}
+			} else if (input == "shn") {
+    			cout << BOLDMAGENTA << "Enter your new hostname. (must have elevated privileges)\n" << RESET << "$ ";
+    			cin >> input;
+					#ifdef _WIN32
+					system("wmic computersystem where name='%COMPUTERNAME%' call rename name='NEW-NAME'");
+					#endif
+					#ifdef __unix__
+					filestream.open("/etc/hostname");
+					#endif
+					if (filestream.is_open()) {
+						filestream << input;
+						filestream.close();
+					} else { 
+						cout << BOLDMAGENTA << "Unable to open file! Do you have access?\n" << RESET;
+					}
+				}
 		} else {
-		cout << BOLDMAGENTA << "Unknown command! Try it in Bash!\nTo get back to YoungShell, just type `exit`\n" << RESET;
-    system("bash");
-  }
+   		cout << system(input.c_str()) << "\n";
+  	}
   recieveInput();
 }
 
 int main() {
-  system("clear");
-  cout << BOLDCYAN << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n-----------------------------------------------------------------------------\n" << "\033[0m";
-	#ifdef _WIN32
-	cout << ">| Sorry about no colored output for Windows!\n>I'm working on it!\n-----------------------------------------------------------------------------\n";
-	#endif
+  clearShell();
   recieveInput();
   return 0;
 }
