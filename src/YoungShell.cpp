@@ -6,6 +6,8 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <thread>
+#include <chrono>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -35,21 +37,52 @@ using namespace std;
 #define UNDERLINE_OFF "\033[0m" /* Turn off underlining */
 #endif
 
-int clearShell() {
+bool epsh = false;
+ofstream filestream;
+
+void setEnv() {
+	system("export USER=$(whoami);export HOSTNAME=$(hostname);export DIRS=$(pwd | sed 's|^$HOME|~|' );");
+}
+
+string showPrompt(string type, int thing) {
+	setEnv();
+	if (type == "long") {
+		if (epsh == true) {
+			cout << RESET << "(evsh) " << RESET;
+		}
+		string input = "";
+		cout << BOLDGREEN << getenv("USER") << "@" << getenv("HOSTNAME") << RESET << ":" << BOLDBLUE << getenv("DIRS") << RESET << "$ ";
+		cin >> input;
+		return input;
+	} else if (type == "short") {
+		if (epsh == true) {
+			cout << RESET << "(evsh) " << RESET;
+		}
+		string input = "";
+		cout << RESET << "$ ";
+		cin >> input;
+		return input;
+	} else {
+		throw "showPrompt(string type): Invaild Type";
+	}
+}
+
+int clearShell(int argc, int argv[]) {
+	setEnv();
 	system("clear");
-	cout << BOLDCYAN << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n-----------------------------------------------------------------------------\n" << "\033[0m";
+	cout << BOLDCYAN << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `exit` to exit!\nType `help` for help!\n-----------------------------------------------------------------------------\n" << RESET;
 	#ifdef _WIN32
 	cout << ">| Sorry about no colored output for Windows!\n>| I'm working on it!\n-----------------------------------------------------------------------------\n";
 	#endif
+	if (epsh == true) {
+		cout << BOLDRED << "YOU ARE RUNNING IN 'ELEVATED_PRIVELLEGES' MODE\nBE SURE YOU KNOW WHAT YOU ARE DOING!!\n" << BOLDCYAN << "\n-----------------------------------------------------------------------------\n" << RESET;
+		// "sudo" >> input;
+	}
 }
 
-int recieveInput() {
-  string input = WHITE;
-  input = "";
-	ofstream filestream;
-
-  cout << BOLDGREEN << getenv("USER") << "@" << getenv("HOSTNAME") << RESET << ":" << BOLDBLUE << getenv("DIRS") << RESET << "$ ";
-  cin >> input;
+int recieveInput(int argc, int argv[]) {
+	setEnv();
+	string input = showPrompt("long", false);
 
   if (input == "help") {
     cout << BOLDMAGENTA << ">| Commands: \n- help | Run the YoungShell help command.\n- exit | Exit out of YoungShell (and also terminal if this is your default shell)\n- reload | Reload everything!\n- clear | Clear the shell.\n- gab | 'Globally Avaliable Binary' (requires elevated permissions)\n- update | Update YoungShell and optionally the host computer (could need elevated permissions)\n- m3 | 'Manage/Modify My Machine' \n>| Everything else will go to your default shell and returned back to you\n" << RESET;
@@ -60,10 +93,10 @@ int recieveInput() {
     system("bash src/Setup.sh");
     return 0;
   } else if (input == "clear") {
-		clearShell();
+		clearShell(argc, argv);
   } else if (input == "update") {
 		cout << BOLDYELLOW << "Now updating YoungShell..." << RESET << WHITE << "\n";
-		system("git pull https://github.com/youngchief-btw/YoungShell.git;git fetch https://github.com/youngchief-btw/YoungShell.git");
+		system("cd ..;rm -rf YoungShell;git clone https://github.com/youngchief-btw/YoungShell.git;bash src/Setup.sh");
 		cout << RESET << BOLDYELLOW << "Do you want to install system & application updates as well? (might require sudo permissions) [y/N]:" << RESET << " ";
 		cin >> input;
 		if (input == "y") {
@@ -80,7 +113,7 @@ int recieveInput() {
 		} else {}
 	} else if (input == "gab") {
 		cout << BOLDMAGENTA << "Globally Avaliable Binary (GAB) [do/undo]\n" << RESET;
-		cin >> input;
+		string input = showPrompt("short", false);
 		if (input == "do") {
 		cout << BOLDMAGENTA << "Now creating a link from here to /bin/ys\nMake sure to have sudo permissions!\n" << RESET;
 		#ifdef _WIN32
@@ -94,14 +127,14 @@ int recieveInput() {
 			system("rm -rf /bin/ys");
 		}
 	} else if (input == "m3") {
-		cout << BOLDMAGENTA << "Welcome to Manage My Machine!!\nValid Options: dns (DNS Settings), msc (Machine Specific Commands), shn (Set HostName) (requires elevated permissions)\n" << RESET << "$ ";
-		cin >> input;
+		cout << BOLDMAGENTA << "Welcome to Manage My Machine!!\nValid Options: dns (DNS Settings), msc (Machine Specific Commands), shn (Set HostName) (requires elevated permissions)\n" << RESET;
+		string input = showPrompt("short", false);
 		if (input == "dns") {
-			cout << BOLDMAGENTA << ">| DNS Settings\nValid Options: setsrvs (Set Servers, Comma Seperated)\n" << RESET << "$ ";
-			cin >> input;
+			cout << BOLDMAGENTA << ">| DNS Settings\nValid Options: setsrvs (Set Servers, Comma Seperated)\n" << RESET;
+			string input = showPrompt("short", false);
 			if (input == "setsrvs") {
-				cout << BOLDMAGENTA << ">>| Setting DNS Servers\n" << RESET << "$ ";
-				cin >> input;
+				cout << BOLDMAGENTA << ">>| Setting DNS Servers\n" << RESET;
+				string input = showPrompt("short", false);
 				#ifdef __MACH__
 				system("networksetup -setdnsservers Wi-Fi" << input);
 				#endif
@@ -117,25 +150,25 @@ int recieveInput() {
 				cout << BOLDMAGENTA << "DNS Servers Set!\n" << RESET;
 			}
 		} else if (input == "msc") {
-			cout << BOLDMAGENTA << ">| Machine Specific Commands\n>| Valid Options: windows (Windows), \n" << RESET << "$ ";
-			cin >> input;
+			cout << BOLDMAGENTA << ">| Machine Specific Commands\n>| Valid Options: windows (Windows), \n" << RESET;
+			string input = showPrompt("short", false);
 			if (input == "windows") {
 				#ifdef __unix__
 				cout << BOLDMAGENTA << "Sorry! This is only for Windows users and you don't qualify!\n";
 				#endif
 				#ifdef _WIN32
-				cout << BOLDMAGENTA << ">>| Windows\n" << RESET << "$ ";
-				cin >> input;
+				cout << BOLDMAGENTA << ">>| Windows\n" << RESET ;
+				string input = showPrompt("short", false);
 				if (input == "awwr") {
-					cout << BOLDMAGENTA << "Have you backed up your computer? [y/N]\n" << RESET << "$ ";
-					cin >> input;
+					cout << BOLDMAGENTA << "Have you backed up your computer? [y/N]\n" << RESET;
+					string input = showPrompt("short", false);
 					if (input == "y") {
 						cout << BOLDMAGENTA << "Now attempting 'Activate Windows' watermark removal...\nIf it doesn't work try the steps manually:\n- https://computergarage.org/how-to-remove-activate-windows-10-watermark-permanently.html\n- https://msguides.com/microsoft-software-products/2-ways-activate-windows-10-free-without-software.html\nBe sure to reboot your computer!\n" << RESET;
 						system("reg add HKEY_CURRENT_USER\Control Panel\Desktop /v PaintDesktopVersion /d 0 /f;bcdedit -set TESTSIGNING OFF");
-						cout << BOLDMAGENTA << "Would you like to reboot now? [y/N]\n" << RESET << "$ ";
-						cin >> input;
+						cout << BOLDMAGENTA << "Would you like to reboot now? [y/N]\n" << RESET ;
+						string input = showPrompt("short", false);
 						if (input == "y") {
-							cout << BOLDMAGENTA << "Rebooting in 5 seconds...\n" << RESET << "$ ";
+							cout << BOLDMAGENTA << "Rebooting in 5 seconds...\n" << RESET ;
 							chrono::milliseconds timespan(5000);
 							this_thread::sleep_for(timespan);
 							system("shutdown /r");
@@ -148,13 +181,13 @@ int recieveInput() {
 					#endif
 				} else if (input == "spk") {
 					cout << BOLDMAGENTA << "What would you like to set your product key to?\n" << RESET;
-					cin >> input;
+					string input = showPrompt("short", false);
 					system("slmgr.vbs /ipk ");
 					cout << BOLDMAGENTA << "\n" << RESET;
 				}
 			} else if (input == "shn") {
-    			cout << BOLDMAGENTA << "Enter your new hostname. (must have elevated privileges)\n" << RESET << "$ ";
-    			cin >> input;
+    			cout << BOLDMAGENTA << "Enter your new hostname. (must have elevated privileges)\n" << RESET ;
+    			string input = showPrompt("short", false);
 					#ifdef _WIN32
 					system("wmic computersystem where name='%COMPUTERNAME%' call rename name='NEW-NAME'");
 					#endif
@@ -171,11 +204,11 @@ int recieveInput() {
 		} else {
    		cout << system(input.c_str()) << "\n";
   	}
-  recieveInput();
+  recieveInput(argc, argv);
 }
 
-int main() {
-  clearShell();
-  recieveInput();
+int main(int argc, int argv[]) {
+  clearShell(argc, argv);
+  recieveInput(argc, argv);
   return 0;
 }
