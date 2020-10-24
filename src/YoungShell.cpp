@@ -149,7 +149,7 @@ int recieveInput() {
 				} else if (input == "spk") {
 					cout << BOLDMAGENTA << "What would you like to set your product key to?\n" << RESET;
 					cin >> input;
-					system("slmgr.vbs /ipk " + input.c_str());
+					system("slmgr.vbs /ipk ");
 					cout << BOLDMAGENTA << "\n" << RESET;
 				}
 			} else if (input == "shn") {
