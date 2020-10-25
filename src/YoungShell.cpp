@@ -94,7 +94,7 @@ int recieveInput(int argc, int argv[]) {
 		clearShell(argc, argv);
   } else if (input == "update") {
 		cout << BOLDYELLOW << "Now updating YoungShell..." << RESET << WHITE << "\n";
-		system("cd ..;rm -rf YoungShell;git clone https://github.com/youngchief-btw/YoungShell.git;cd YoungShell;bash src/Setup.sh");
+		system("cd ..;rm -rf YoungShell;git clone https://github.com/youngchief-btw/YoungShell.git;cd YoungShell");
 		cout << RESET << BOLDYELLOW << "Do you want to install system & application updates as well? (might require sudo permissions) [y/N]:" << RESET << " ";
 		cin >> input;
 		if (input == "y") {
