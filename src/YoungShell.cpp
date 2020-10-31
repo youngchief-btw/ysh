@@ -8,6 +8,8 @@
 #include <iterator>
 #include <thread>
 #include <chrono>
+#include <termios.h>
+#include <unistd.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -45,7 +47,39 @@ void setEnv() {
 	system("export USER=$(whoami);export HOSTNAME=$(hostname);export DIRS=$(pwd | sed 's|^$HOME|~|' );");
 }
 
-string showPrompt(string type) {
+void setEcho(bool enable = false)
+{
+#ifdef WIN32
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+    DWORD mode;
+    GetConsoleMode(hStdin, &mode);
+
+    if( !enable )
+        mode &= ~ENABLE_ECHO_INPUT;
+    else
+        mode |= ENABLE_ECHO_INPUT;
+
+    SetConsoleMode(hStdin, mode );
+
+#elif __unix__
+    struct termios tty;
+    tcgetattr(STDIN_FILENO, &tty);
+    if( !enable )
+        tty.c_lflag &= ~ECHO;
+    else
+        tty.c_lflag |= ECHO;
+
+    (void) tcsetattr(STDIN_FILENO, TCSANOW, &tty);
+#else
+if (enable == false) {
+	system("stty echo");
+} else {
+	system("stty -echo");
+}
+#endif
+}
+
+string showPrompt(string type = "long") {
 	setEnv();
 	if (epsh == true) {
 		cout << RESET << "(epsh) " << RESET;
@@ -68,7 +102,7 @@ string showPrompt(string type) {
 int clearShell(int argc, int argv[]) {
 	setEnv();
 	system("clear");
-	cout << BOLDCYAN << "Welcome to YoungShell!\nYoungShell is open-source!! ( https://github.com/youngchief-btw/YoungShell )\n© 2020 youngchief btw ツ, All rights reserved.\nType `help` for help!\n-----------------------------------------------------------------------------\n" << RESET;
+	cout << BOLDCYAN << "Welcome to YoungShell!\n>| https://github.com/youngchief-btw/YoungShell | https://donate.youngchief.tk\n© 2020 youngchief btw ツ, All rights reserved.\nType `help` for help!\n-----------------------------------------------------------------------------\n" << RESET;
 	#ifdef _WIN32
 	cout << ">| Sorry about no colored output for Windows!\n>| I'm working on it!\n-----------------------------------------------------------------------------\n";
 	#endif
@@ -88,7 +122,7 @@ int recieveInput(int argc, int argv[]) {
     cout << BOLDMAGENTA << "Now exiting YoungShell...\n" << RESET;
     return 0;
   } else if (input == "reload") {
-    system("bash src/Setup.sh");
+		system("bash src/Setup.sh");
     return 0;
   } else if (input == "clear") {
 		clearShell(argc, argv);
@@ -180,7 +214,7 @@ int recieveInput(int argc, int argv[]) {
 				} else if (input == "spk") {
 					cout << BOLDMAGENTA << "What would you like to set your product key to?\n" << RESET;
 					string input = showPrompt("short");
-					system("slmgr.vbs /ipk ");
+					system("slmgr.vbs /ipk");
 					cout << BOLDMAGENTA << "\n" << RESET;
 				}
 			} else if (input == "shn") {
