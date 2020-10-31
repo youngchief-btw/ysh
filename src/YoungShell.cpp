@@ -40,6 +40,7 @@ using namespace std;
 #endif
 
 string lastCharOfPrompt = "$";
+string msg_permissionDenied = "Uh oh, permission denied!";
 bool epsh = false;
 ofstream filestream;
 
@@ -167,19 +168,23 @@ int recieveInput(int argc, int argv[]) {
 			if (input == "setsrvs") {
 				cout << BOLDMAGENTA << ">>| Setting DNS Servers\n" << RESET;
 				string input = showPrompt("short");
+				#define define_input showPrompt("short");
 				#ifdef __MACH__
-				system("networksetup -setdnsservers Wi-Fi" << input);
+				#define cmdprefix "networksetup -setdnsservers Wi-Fi"
+				system(cmdprefix + " " + input);
 				#endif
 				#ifdef linux
 				filestream.open("/etc/resolv.conf");
 				if (filestream.is_open()) {
 					filestream << "nameserver " << input;
+					cout << BOLDMAGENTA << "DNS Servers Set!\n" << RESET;
+				} else {
+					cout << BOLDMAGENTA << msg_permissionDenied << "\n" << RESET;
 				}
 				filestream.close();
 				#endif
 				#ifdef _WIN32
 				#endif
-				cout << BOLDMAGENTA << "DNS Servers Set!\n" << RESET;
 			}
 		} else if (input == "msc") {
 			cout << BOLDMAGENTA << ">| Machine Specific Commands\n>| Valid Options: windows (Windows), \n" << RESET;
@@ -214,14 +219,16 @@ int recieveInput(int argc, int argv[]) {
 				} else if (input == "spk") {
 					cout << BOLDMAGENTA << "What would you like to set your product key to?\n" << RESET;
 					string input = showPrompt("short");
-					system("slmgr.vbs /ipk");
+					#define cmdprefix "slmgr.vbs /ipk"
+					system(cmdprefix + " " + input);
 					cout << BOLDMAGENTA << "\n" << RESET;
 				}
 			} else if (input == "shn") {
     			cout << BOLDMAGENTA << "Enter your new hostname. (must have elevated privileges)\n" << RESET ;
     			string input = showPrompt("short");
 					#ifdef _WIN32
-					system("wmic computersystem where name='%COMPUTERNAME%' call rename name='" << input << "'");
+					#define cmdprefix "wmic computersystem where name '%COMPUTERNAME%' call rename name='"
+					system(cmdprefix + input + "'");
 					#endif
 					#ifdef __unix__
 					filestream.open("/etc/hostname");
