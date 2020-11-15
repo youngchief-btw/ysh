@@ -51,7 +51,7 @@ void setEnv() {
 void setEcho(bool enable = false)
 {
 #ifdef WIN32
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode;
     GetConsoleMode(hStdin, &mode);
 
@@ -217,10 +217,9 @@ int recieveInput(int argc, int argv[]) {
 					}
 					#endif
 				} else if (input == "spk") {
-					cout << BOLDMAGENTA << "What would you like to set your product key to?\n" << RESET;
+					cout << BOLDMAGENTA << "What would you like to set your product key to? (exit out for now, this isn't implemented yet)\n" << RESET;
 					string input = showPrompt("short");
-					#define cmdprefix "slmgr.vbs /ipk"
-					system(cmdprefix + " " + input);
+					// system("slmgr.vbs /ipk");
 					cout << BOLDMAGENTA << "\n" << RESET;
 				}
 			} else if (input == "shn") {
@@ -236,7 +235,7 @@ int recieveInput(int argc, int argv[]) {
 					if (filestream.is_open()) {
 						filestream << input;
 						filestream.close();
-					} else { 
+					} else {
 						cout << BOLDMAGENTA << "Unable to open file! Do you have access?\n" << RESET;
 					}
 				}
