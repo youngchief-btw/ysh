@@ -153,7 +153,7 @@ int recieveInput(int argc, int argv[]) {
 		system("mklink $(echo %cd%)\ys \Windows\System32\ys");
 		#endif
 		#ifdef __unix__
-		system("ln $(pwd)/ys /bin/ys");
+		system("ln $(pwd)/ysh /bin/ysh");
 		#endif
 		} else if (input == "undo") {
 			cout << BOLDMAGENTA << "Now unlinking the globally avaliable binary from here\nMake sure to have sudo permissions!\n" << RESET;
